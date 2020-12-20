@@ -1,8 +1,9 @@
 const express = require("express");
-const data = require("./utils/data");
+const getData = require("./utils/data");
 const router = express.Router();
 
-router.get("/merch", (req, res) => {
+router.get("/merch", async (req, res) => {
+  const data = await getData();
   res.json(data);
 });
 
