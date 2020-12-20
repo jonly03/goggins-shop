@@ -1,60 +1,81 @@
-const data = [
-  {
-    name: "Can't Hurt Boat Crew 2 Navy Triblend Tee",
-    price: "$30.00",
-    image:
-      "https://cdn.shopify.com/s/files/1/0436/9101/6349/products/DGSSCHBC2NVY1.png?v=1605560670",
-    variants: [
-      { size: "Small", available: false },
-      { size: "Medium", available: false },
-      { size: "Large", available: false },
-      { size: "X-Large", available: true },
-      { size: "2X-Large", available: true },
-      { size: "3X-Large", available: true },
-    ],
-  },
-  {
-    name: "Ethos Heather Grey Triblend Tee",
-    price: "$30.00",
-    image:
-      "https://cdn.shopify.com/s/files/1/0436/9101/6349/products/Ethos_HG_front_back-min.png?v=1602706478",
-    variants: [
-      { size: "Small", available: false },
-      { size: "Medium", available: false },
-      { size: "Large", available: true },
-      { size: "X-Large", available: true },
-      { size: "2X-Large", available: true },
-      { size: "3X-Large", available: true },
-    ],
-  },
-  {
-    name: "Who's Gonna Carry the Boats Black Triblend Hooded Long Sleeve",
-    price: "$45.00",
-    image:
-      "https://cdn.shopify.com/s/files/1/0436/9101/6349/products/WGCB_BK_Front_Back-min.png?v=1602713464",
-    variants: [
-      { size: "Small", available: false },
-      { size: "Medium", available: false },
-      { size: "Large", available: true },
-      { size: "X-Large", available: true },
-      { size: "2X-Large", available: true },
-      { size: "3X-Large", available: true },
-    ],
-  },
-  {
-    name: "When the End is Unknown, Stay Hard  Black Raglan Hooded Sweatshirt",
-    price: "$65.00",
-    image:
-      "//cdn.shopify.com/s/files/1/0436/9101/6349/products/DGHDWEIUSHBK1.png?v=1605561585",
-    variants: [
-      { size: "Small", available: false },
-      { size: "Medium", available: false },
-      { size: "Large", available: false },
-      { size: "X-Large", available: false },
-      { size: "2X-Large", available: false },
-      { size: "3X-Large", available: false },
-    ],
-  },
-];
+const puppeteer = require("puppeteer");
+const cheerio = require("cheerio");
 
-module.exports = data;
+/*
+1. Go to https://shop.davidgoggins.com/collections/apparel to get links for all the tshirt pages links
+
+2. Visit each tshirt page and get product info data
+*/
+
+const GOGGINS_BASE_URL = "https://shop.davidgoggins.com";
+const TSHIRT_COLLECTION_PAGE = `${GOGGINS_BASE_URL}/collections/apparel`;
+
+const PRODUCT_LINK_SELECTOR = ".collectionBlock__title > h4 > a";
+const PRODUCT_INFO_SELECTOR = "#ProductJson--product-template";
+
+async function getPageContent({ page, selector }) {
+  const browser = await puppeteer.launch();
+  const newPage = await browser.newPage();
+  await newPage.goto(page);
+  await newPage.waitForSelector(selector);
+  return newPage.content();
+}
+
+async function getProductsLinks({ page, selector }) {
+  return new Promise((resolve, reject) => {
+    getPageContent({ page, selector })
+      .then((linksPage) => {
+        const $ = cheerio.load(linksPage);
+
+        const linksURLs = [];
+        const productsLinks = $(selector);
+
+        for (let i = 0; i < productsLinks.length; i++) {
+          linksURLs.push(
+            `${GOGGINS_BASE_URL}${$(productsLinks[i]).attr("href")}`
+          );
+        }
+
+        resolve(linksURLs);
+      })
+      .catch((err) => {
+        console.log(err);
+        resolve([]);
+      });
+  });
+}
+
+function getProductInfo({ page, selector }) {
+  const __$ = cheerio.load(page);
+
+  const product = JSON.parse(__$(selector).html());
+
+  return {
+    name: product.title,
+    price: `$${(product.price / 100).toFixed(2)}`,
+    image: `https:${product.featured_image}`,
+    variants: product.variants.map((variant) => ({
+      size: variant.option1,
+      available: variant.available,
+    })),
+  };
+}
+
+async function getTshirtsProductInfo() {
+  const tshirtsLinksUrls = await getProductsLinks({
+    page: TSHIRT_COLLECTION_PAGE,
+    selector: PRODUCT_LINK_SELECTOR,
+  });
+
+  const getTshirtsData = tshirtsLinksUrls.map((url) =>
+    getPageContent({ page: url, selector: PRODUCT_INFO_SELECTOR })
+  );
+
+  const tshirtPages = await Promise.all(getTshirtsData);
+
+  return tshirtPages.map((page) =>
+    getProductInfo({ page, selector: PRODUCT_INFO_SELECTOR })
+  );
+}
+
+module.exports = getTshirtsProductInfo;
