@@ -1,60 +1,53 @@
 import "./App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import Axios from "axios";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
-import GridList from "@material-ui/core/GridList";
-import GridListTile from "@material-ui/core/GridListTile";
-import GridListTileBar from "@material-ui/core/GridListTileBar";
-// import ListSubheader from "@material-ui/core/ListSubheader";
-import IconButton from "@material-ui/core/IconButton";
-import InfoIcon from "@material-ui/icons/Info";
-import Tooltip from "@material-ui/core/Tooltip";
+import Paper from "@material-ui/core/Paper";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CardMedia from "@material-ui/core/CardMedia";
+import Grid from "@material-ui/core/Grid";
+
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 
 const useStyles = makeStyles((theme) => ({
-    root: {
+    paperRoot: {
         display: "flex",
+        flexFlow: "column",
+        margin: theme.spacing(2),
+        width: theme.spacing(50),
+        height: theme.spacing(90),
+
+        // "& > *": {
+        //     margin: theme.spacing(2),
+        //     width: theme.spacing(35),
+        //     height: theme.spacing(10),
+        // },
+    },
+    gridRoot: {
+        flexGrow: 1,
         flexWrap: "wrap",
-        alignContent: "center",
-        width: "100%",
-        justifyContent: "space-around",
-        overflow: "hidden",
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: "white",
+        // height: "74vh",
     },
-    gridList: {
-        minWidth: 400,
-        maxWidth: "75vw",
-        height: "75vh",
+    title: {
+        fontSize: 14,
+        height: "50px",
     },
-    icon: {
-        color: "rgba(255, 255, 255, 0.54)",
+    media: {
+        height: 0,
+        paddingTop: "100%", // 16:9
     },
 }));
-
-const LightTooltip = withStyles((theme) => ({
-    tooltip: {
-        backgroundColor: "#bc9642",
-        color: "#282c34",
-        // color: "rgba(0, 0, 0, 0.87)",
-        boxShadow: theme.shadows[1],
-        fontSize: 15,
-    },
-}))(Tooltip);
 
 function App() {
     const classes = useStyles();
 
     const [merchData, setMerchData] = useState([]);
-    const [open, setOpen] = useState(false);
-
-    const handleOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
 
     useEffect(() => {
         Axios.get("http://localhost:4000/").then((merch) => {
@@ -73,48 +66,54 @@ function App() {
                     style={{ height: "100vh" }}
                 >
                     <h1>DAVID GOGGINS RESTOCK SITE</h1>
-                    <div className={classes.root}>
-                        <GridList
-                            cellHeight={180}
-                            className={classes.gridList}
-                            cols={4}
-                        >
-                            <GridListTile
-                                key="Subheader"
-                                cols={4}
-                                style={{ height: "auto" }}
+                    {/* <div className={classes.root}> */}
+                    <Grid
+                        container
+                        justify="center"
+                        className={classes.gridRoot}
+                    >
+                        {merchData.map((merch) => (
+                            <Paper
+                                className={classes.paperRoot}
+                                variant="contained"
+                                key={merch.image}
+                                elevation={3}
                             >
-                                {/* <ListSubheader component="div">
-                                    December
-                                </ListSubheader> */}
-                            </GridListTile>
-                            {merchData.map((merch) => (
-                                <GridListTile key={merch.image}>
-                                    <img src={merch.image} alt={merch.name} />
-                                    <GridListTileBar
+                                <CardContent>
+                                    <Typography
+                                        className={classes.title}
+                                        color="textSecondary"
+                                        gutterBottom
+                                    >
+                                        {merch.name}
+                                    </Typography>
+                                    <CardMedia
+                                        className={classes.media}
+                                        image={merch.image}
                                         title={merch.name}
-                                        subtitle={
-                                            <span>Price: {merch.price}</span>
-                                        }
-                                        actionIcon={
-                                            <IconButton
-                                                aria-label={`info about ${merch.name}`}
-                                                className={classes.icon}
-                                            >
-                                                <LightTooltip
-                                                    title={merch.name}
-                                                    arrow
-                                                >
-                                                    <InfoIcon />
-                                                </LightTooltip>
-                                            </IconButton>
-                                        }
                                     />
-                                </GridListTile>
-                            ))}
-                        </GridList>
-                    </div>
-                    <footer>MADE WITH ♡ + PASSION</footer>
+                                    <Typography
+                                        className={classes.title}
+                                        color="textSecondary"
+                                        gutterBottom
+                                    >
+                                        PRICE: {merch.price}
+                                    </Typography>
+
+                                    <Typography
+                                        className={classes.title}
+                                        color="textSecondary"
+                                        gutterBottom
+                                    >
+                                        {merch.variants.map((item) => (
+                                            <p>Size: {item.size}</p>
+                                        ))}
+                                    </Typography>
+                                </CardContent>
+                            </Paper>
+                        ))}
+                    </Grid>
+                    {/* <footer>MADE WITH ♡ + PASSION</footer> */}
                 </Container>
             </header>
         </div>
