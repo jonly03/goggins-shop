@@ -14,7 +14,9 @@ const PRODUCT_LINK_SELECTOR = ".collectionBlock__title > h4 > a";
 const PRODUCT_INFO_SELECTOR = "#ProductJson--product-template";
 
 async function getPageContent({ page, selector }) {
-  const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const newPage = await browser.newPage();
   await newPage.goto(page);
   await newPage.waitForSelector(selector);
