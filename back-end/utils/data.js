@@ -47,7 +47,7 @@ async function getProductsLinks({ page, selector }) {
   });
 }
 
-function getProductInfo({ page, selector }) {
+function getProductInfo({ page, selector, idx, urls }) {
   const __$ = cheerio.load(page);
 
   const product = JSON.parse(__$(selector).html());
@@ -56,6 +56,7 @@ function getProductInfo({ page, selector }) {
     name: product.title,
     price: `$${(product.price / 100).toFixed(2)}`,
     image: `https:${product.featured_image}`,
+    productLink: urls[idx],
     variants: product.variants.map((variant) => ({
       size: variant.option1,
       available: variant.available,
@@ -75,8 +76,13 @@ async function getTshirtsProductInfo() {
 
   const tshirtPages = await Promise.all(getTshirtsData);
 
-  return tshirtPages.map((page) =>
-    getProductInfo({ page, selector: PRODUCT_INFO_SELECTOR })
+  return tshirtPages.map((page, idx) =>
+    getProductInfo({
+      page,
+      selector: PRODUCT_INFO_SELECTOR,
+      idx,
+      urls: tshirtsLinksUrls,
+    })
   );
 }
 
