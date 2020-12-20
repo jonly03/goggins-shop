@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
         flexFlow: "column",
         margin: theme.spacing(2),
         width: theme.spacing(50),
-        height: theme.spacing(90),
+        height: theme.spacing(95),
 
         // "& > *": {
         //     margin: theme.spacing(2),
@@ -36,7 +36,11 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         fontSize: 14,
-        height: "50px",
+        flex: 1,
+    },
+    availableTbl: {
+        width: "70%",
+        display: "flex",
     },
     media: {
         height: 0,
@@ -50,7 +54,7 @@ function App() {
     const [merchData, setMerchData] = useState([]);
 
     useEffect(() => {
-        Axios.get("http://localhost:4000/").then((merch) => {
+        Axios.get("/api/merch").then((merch) => {
             console.log(merch.data);
             setMerchData(merch.data);
         });
@@ -99,16 +103,31 @@ function App() {
                                     >
                                         PRICE: {merch.price}
                                     </Typography>
-
-                                    <Typography
-                                        className={classes.title}
-                                        color="textSecondary"
-                                        gutterBottom
-                                    >
-                                        {merch.variants.map((item) => (
-                                            <p>Size: {item.size}</p>
-                                        ))}
-                                    </Typography>
+                                    <div className={classes.availableTbl}>
+                                        <Typography
+                                            className={classes.title}
+                                            color="textSecondary"
+                                            gutterBottom
+                                        >
+                                            {merch.variants.map((item) => (
+                                                <p>Size: {item.size}</p>
+                                            ))}
+                                        </Typography>
+                                        <Typography
+                                            className={classes.title}
+                                            color="textSecondary"
+                                            gutterBottom
+                                        >
+                                            {merch.variants.map((item) => (
+                                                <p>
+                                                    Availability:
+                                                    {item.available
+                                                        ? "Available"
+                                                        : "Sold Out"}
+                                                </p>
+                                            ))}
+                                        </Typography>
+                                    </div>
                                 </CardContent>
                             </Paper>
                         ))}

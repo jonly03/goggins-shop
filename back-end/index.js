@@ -1,11 +1,10 @@
 const express = require("express");
-const data = require("./utils/data");
-const server = express();
+const getData = require("./utils/data");
+const router = express.Router();
 
-server.get("/", (req, res) => {
+router.get("/merch", async (req, res) => {
+  const data = await getData();
   res.json(data);
 });
 
-server.listen(process.env.PORT || 4000, () => {
-  console.log("server listening");
-});
+module.exports = router;
