@@ -1,0 +1,20 @@
+{
+  "name": "goggins-shop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node back-end/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonly03/goggins-shop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jonly03/goggins-shop/issues"
+  },
+  "homepage": "https://github.com/jonly03/goggins-shop#readme"
+}
