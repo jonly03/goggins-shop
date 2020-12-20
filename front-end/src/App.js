@@ -1,13 +1,16 @@
 import "./App.css";
+import { useState, useEffect } from "react";
+import Axios from "axios";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
 import GridList from "@material-ui/core/GridList";
 import GridListTile from "@material-ui/core/GridListTile";
 import GridListTileBar from "@material-ui/core/GridListTileBar";
 // import ListSubheader from "@material-ui/core/ListSubheader";
 import IconButton from "@material-ui/core/IconButton";
 import InfoIcon from "@material-ui/icons/Info";
+import Tooltip from "@material-ui/core/Tooltip";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -20,7 +23,8 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: theme.palette.background.paper,
     },
     gridList: {
-        width: 500,
+        minWidth: 400,
+        maxWidth: "75vw",
         height: "75vh",
     },
     icon: {
@@ -28,43 +32,36 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const tileData = [
-    {
-        title: "Image",
-        author: "author",
+const LightTooltip = withStyles((theme) => ({
+    tooltip: {
+        backgroundColor: "#bc9642",
+        color: "#282c34",
+        // color: "rgba(0, 0, 0, 0.87)",
+        boxShadow: theme.shadows[1],
+        fontSize: 15,
     },
-    {
-        title: "Image2",
-        author: "author",
-    },
-    {
-        title: "Image3",
-        author: "author",
-    },
-    {
-        title: "Image3",
-        author: "author",
-    },
-    {
-        title: "Image3",
-        author: "author",
-    },
-    {
-        title: "Image3",
-        author: "author",
-    },
-    {
-        title: "Image3",
-        author: "author",
-    },
-    {
-        title: "Image3",
-        author: "author",
-    },
-];
+}))(Tooltip);
 
 function App() {
     const classes = useStyles();
+
+    const [merchData, setMerchData] = useState([]);
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    useEffect(() => {
+        Axios.get("http://localhost:4000/").then((merch) => {
+            console.log(merch.data);
+            setMerchData(merch.data);
+        });
+    }, []);
 
     return (
         <div className="App">
@@ -91,20 +88,25 @@ function App() {
                                     December
                                 </ListSubheader> */}
                             </GridListTile>
-                            {tileData.map((tile) => (
-                                <GridListTile key={tile.img}>
-                                    <img src={tile.img} alt={tile.title} />
+                            {merchData.map((merch) => (
+                                <GridListTile key={merch.image}>
+                                    <img src={merch.image} alt={merch.name} />
                                     <GridListTileBar
-                                        title={tile.title}
+                                        title={merch.name}
                                         subtitle={
-                                            <span>by: {tile.author}</span>
+                                            <span>Price: {merch.price}</span>
                                         }
                                         actionIcon={
                                             <IconButton
-                                                aria-label={`info about ${tile.title}`}
+                                                aria-label={`info about ${merch.name}`}
                                                 className={classes.icon}
                                             >
-                                                <InfoIcon />
+                                                <LightTooltip
+                                                    title={merch.name}
+                                                    arrow
+                                                >
+                                                    <InfoIcon />
+                                                </LightTooltip>
                                             </IconButton>
                                         }
                                     />
